@@ -184,8 +184,6 @@ Responsable de:
 * Modelo lógico.
 * Modelo físico.
 * Scripts SQL.
-* Migraciones.
-* Diccionario de datos.
 
 ---
 
@@ -196,7 +194,6 @@ Responsable de:
 * Documentación técnica.
 * Diagramas ER.
 * Manuales de usuario.
-* Entregables académicos.
 * Evidencias del proyecto.
 
 ---
