@@ -183,6 +183,7 @@ Responsable de:
 * Modelo conceptual.
 * Modelo lógico.
 * Modelo físico.
+* Diccionario de datos.
 * Scripts SQL.
 
 ---
