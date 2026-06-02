@@ -179,11 +179,8 @@ Responsable de:
 
 Responsable de:
 
-* Modelo conceptual.
-* Modelo lógico.
-* Modelo físico.
-* Diccionario de datos.
 * Scripts SQL.
+* Manejo de la bd dentro del sistema
 
 ---
 
@@ -191,9 +188,7 @@ Responsable de:
 
 Responsable de:
 
-* Documentación técnica.
 * Diagramas ER.
-* Manuales de usuario.
 * Evidencias del proyecto.
 
 ---
