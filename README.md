@@ -1,6 +1,6 @@
 # Clínica Bienestar — Sistema de Gestión Médica
 
-**Proyecto académico universitario** desarrollado por el equipo **DataBridge** como parte de un curso de Bases de Datos e Ingeniería de Software.
+**Proyecto académico** desarrollado por el equipo **DataBridge** como parte de un curso de Bases de Datos e Ingeniería de Software.
 
 ---
 
@@ -103,7 +103,6 @@ La estructura de la base de datos fue diseñada a partir del análisis de requer
 
 Actualmente el sistema utiliza principalmente las siguientes entidades:
 
-* USUARIO
 * PACIENTE
 * MEDICO
 * CITA
