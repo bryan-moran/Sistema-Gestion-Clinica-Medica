@@ -1,122 +1,272 @@
--- =============================================
--- BASE DE DATOS: clinicamedica_prueba01
--- =============================================
+CREATE DATABASE IF NOT EXISTS clinicamedica_stm
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_general_ci;
 
-CREATE DATABASE IF NOT EXISTS clinicamedica_prueba01;
-USE clinicamedica_prueba01;
+USE clinicamedica_stm;
 
--- =============================================
--- TABLA: usuarios
--- =============================================
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(30) NOT NULL UNIQUE,
+-- ============================================================
+-- USUARIOS
+-- ============================================================
+
+CREATE TABLE usuarios (
+    id INT NOT NULL AUTO_INCREMENT,
+    usuario VARCHAR(30) NOT NULL,
     contrasena VARCHAR(255) NOT NULL,
-    rol ENUM('Administrador', 'Secretaria', 'Médico General', 'Médico Pediatra') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    rol ENUM(
+        'Administrador',
+        'Secretaria',
+        'Médico General',
+        'Médico Pediatra'
+    ) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY usuario (usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =============================================
--- TABLA: pacientes
--- =============================================
-CREATE TABLE IF NOT EXISTS pacientes (
-    dui VARCHAR(10) PRIMARY KEY,
+-- ============================================================
+-- MEDICOS
+-- ============================================================
+
+CREATE TABLE medicos (
+    dui VARCHAR(10) NOT NULL,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    especialidad VARCHAR(50) DEFAULT NULL,
+    telefono VARCHAR(15) DEFAULT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (dui)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- PACIENTES
+-- ============================================================
+
+CREATE TABLE pacientes (
+    dui VARCHAR(10) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     apellido VARCHAR(50) NOT NULL,
     telefono VARCHAR(15) DEFAULT NULL,
     edad INT DEFAULT NULL,
     fecha_nacimiento DATE DEFAULT NULL,
-    direccion TEXT DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    direccion TEXT,
+    alergias TEXT DEFAULT NULL,
+    anotaciones TEXT DEFAULT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (dui)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =============================================
--- TABLA: medicos
--- =============================================
-CREATE TABLE IF NOT EXISTS medicos (
-    dui VARCHAR(10) PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    apellido VARCHAR(50) NOT NULL,
-    especialidad VARCHAR(50) DEFAULT NULL,
-    telefono VARCHAR(15) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- ============================================================
+-- CITAS
+-- ============================================================
 
--- =============================================
--- TABLA: citas
--- =============================================
-CREATE TABLE IF NOT EXISTS citas (
-    id_cita INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE citas (
+    id_cita INT NOT NULL AUTO_INCREMENT,
     dui_paciente VARCHAR(10) NOT NULL,
     dui_medico VARCHAR(10) NOT NULL,
-    tipo_cita ENUM('consulta', 'control', 'urgencia', 'pediatria', 'general') DEFAULT 'consulta',
+    tipo_cita ENUM(
+        'consulta',
+        'control',
+        'urgencia',
+        'pediatria',
+        'general'
+    ) DEFAULT 'consulta',
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     motivo TEXT NOT NULL,
-    estado ENUM('programada', 'confirmada', 'pendiente', 'completada', 'cancelada') DEFAULT 'programada',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (dui_paciente) REFERENCES pacientes(dui) ON DELETE CASCADE,
-    FOREIGN KEY (dui_medico) REFERENCES medicos(dui) ON DELETE CASCADE
-);
+    estado ENUM(
+        'programada',
+        'confirmada',
+        'pendiente',
+        'completada',
+        'cancelada'
+    ) DEFAULT 'programada',
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_cita),
 
--- =============================================
--- DATOS: Usuarios (contraseñas en texto plano)
--- =============================================
-INSERT INTO usuarios (usuario, contrasena, rol) VALUES
-('admin',           'Admin@2024!',  'Administrador'),
-('secretaria',      'Secre@2024!',  'Secretaria'),
-('medico_general',  'MedGen@2024!', 'Médico General'),
-('medico_pediatra', 'MedPed@2024!', 'Médico Pediatra');
+    KEY fk_cita_paciente (dui_paciente),
+    KEY fk_cita_medico (dui_medico),
 
--- =============================================
--- DATOS: Pacientes
--- =============================================
-INSERT INTO pacientes (dui, nombre, apellido, telefono, edad, fecha_nacimiento, direccion) VALUES
-('12345678-9', 'Ana María',      'Rodríguez', '6123-4567', 34, '1990-05-15', 'Calle Los Pinos #123, Colonia Centro'),
-('98765432-1', 'Carlos Eduardo', 'Méndez',    '6789-0123', 45, '1979-08-22', 'Avenida Reforma #456, Zona 10'),
-('55555555-5', 'María Fernanda', 'López',     '6345-7890', 28, '1996-03-10', 'Boulevard Los Próceres #789'),
-('44444444-4', 'José Antonio',   'Ramírez',   '6567-8901', 52, '1972-11-30', 'Colonia Escalón #321'),
-('33333333-3', 'Laura Patricia', 'Gómez',     '6890-1234', 31, '1993-07-18', 'Residencial San Luis #45'),
-('22222222-2', 'Roberto Carlos', 'Flores',    '6700-1122', 38, '1986-09-25', 'Paseo General Escalón #567'),
-('11111111-1', 'Martha Elena',   'Sánchez',   '6987-6543', 29, '1995-12-03', 'Colonia Médica #12');
+    CONSTRAINT fk_cita_paciente
+        FOREIGN KEY (dui_paciente)
+        REFERENCES pacientes (dui)
+        ON DELETE CASCADE,
 
--- =============================================
--- DATOS: Médicos (solo 2)
--- =============================================
-INSERT INTO medicos (dui, nombre, apellido, especialidad, telefono) VALUES
-('00112233-4', 'Juan Carlos', 'Martínez', 'Medicina General', '7012-3456'),
-('00223344-5', 'Laura Elena',  'García',   'Pediatría',        '7023-4567');
+    CONSTRAINT fk_cita_medico
+        FOREIGN KEY (dui_medico)
+        REFERENCES medicos (dui)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =============================================
--- DATOS: Citas
--- =============================================
+-- ============================================================
+-- CONSULTAS
+-- ============================================================
 
--- Hoy
-INSERT INTO citas (dui_paciente, dui_medico, tipo_cita, fecha, hora, motivo, estado) VALUES
-('12345678-9', '00112233-4', 'consulta',  CURDATE(), '09:00:00', 'Dolor de cabeza persistente',     'confirmada'),
-('98765432-1', '00112233-4', 'control',   CURDATE(), '10:30:00', 'Control de diabetes y presión',   'programada'),
-('55555555-5', '00223344-5', 'pediatria', CURDATE(), '11:00:00', 'Control de crecimiento infantil', 'confirmada'),
-('44444444-4', '00112233-4', 'urgencia',  CURDATE(), '14:30:00', 'Dolor en el pecho',               'pendiente');
+CREATE TABLE consultas (
+    id_consulta INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cita INT NOT NULL,
+    dui_paciente VARCHAR(10) NOT NULL,
+    dui_medico VARCHAR(10) NOT NULL,
+    diagnostico TEXT,
+    notas TEXT,
+    tratamiento TEXT,
+    fecha_consulta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- Mañana
-INSERT INTO citas (dui_paciente, dui_medico, tipo_cita, fecha, hora, motivo, estado) VALUES
-('33333333-3', '00223344-5', 'consulta', DATE_ADD(CURDATE(), INTERVAL 1 DAY), '09:30:00', 'Revisión pediátrica anual', 'programada'),
-('22222222-2', '00112233-4', 'control',  DATE_ADD(CURDATE(), INTERVAL 1 DAY), '11:15:00', 'Chequeo general',           'programada'),
-('11111111-1', '00223344-5', 'consulta', DATE_ADD(CURDATE(), INTERVAL 1 DAY), '15:00:00', 'Control de crecimiento',    'confirmada');
+    PRIMARY KEY (id_consulta),
 
--- Esta semana
-INSERT INTO citas (dui_paciente, dui_medico, tipo_cita, fecha, hora, motivo, estado) VALUES
-('12345678-9', '00112233-4', 'consulta',  DATE_ADD(CURDATE(), INTERVAL 3 DAY), '08:45:00', 'Chequeo general',           'programada'),
-('98765432-1', '00112233-4', 'control',   DATE_ADD(CURDATE(), INTERVAL 4 DAY), '13:30:00', 'Resultados de laboratorio', 'programada'),
-('55555555-5', '00223344-5', 'pediatria', DATE_ADD(CURDATE(), INTERVAL 5 DAY), '10:00:00', 'Vacunas de rutina',         'pendiente'),
-('44444444-4', '00223344-5', 'consulta',  DATE_ADD(CURDATE(), INTERVAL 6 DAY), '16:20:00', 'Seguimiento pediátrico',    'confirmada');
+    UNIQUE KEY uq_cita (id_cita),
 
--- Pasadas (completadas)
-INSERT INTO citas (dui_paciente, dui_medico, tipo_cita, fecha, hora, motivo, estado) VALUES
-('33333333-3', '00112233-4', 'consulta', DATE_SUB(CURDATE(), INTERVAL 10 DAY), '10:00:00', 'Gripe y fiebre',    'completada'),
-('22222222-2', '00223344-5', 'control',  DATE_SUB(CURDATE(), INTERVAL 15 DAY), '11:30:00', 'Control pediátrico','completada'),
-('11111111-1', '00112233-4', 'consulta', DATE_SUB(CURDATE(), INTERVAL 20 DAY), '09:15:00', 'Mareos frecuentes', 'completada');
+    KEY dui_paciente (dui_paciente),
+    KEY dui_medico (dui_medico),
+
+    CONSTRAINT consultas_ibfk_1
+        FOREIGN KEY (dui_paciente)
+        REFERENCES pacientes (dui),
+
+    CONSTRAINT consultas_ibfk_2
+        FOREIGN KEY (dui_medico)
+        REFERENCES medicos (dui)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- EMERGENCIAS
+-- ============================================================
+
+CREATE TABLE emergencias (
+    id_emergencia INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    dui_paciente VARCHAR(10) NOT NULL,
+    dui_medico VARCHAR(10) NOT NULL,
+    motivo TEXT NOT NULL,
+
+    nivel_urgencia ENUM(
+        'alta',
+        'media',
+        'baja'
+    ) NOT NULL DEFAULT 'alta',
+
+    estado ENUM(
+        'pendiente',
+        'atendida',
+        'cancelada'
+    ) NOT NULL DEFAULT 'pendiente',
+
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_emergencia),
+
+    KEY fk_emerg_paciente (dui_paciente),
+    KEY fk_emerg_medico (dui_medico),
+
+    CONSTRAINT fk_emerg_paciente
+        FOREIGN KEY (dui_paciente)
+        REFERENCES pacientes (dui)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_emerg_medico
+        FOREIGN KEY (dui_medico)
+        REFERENCES medicos (dui)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE medicamentos (
+    id_medicamento INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(150) NOT NULL,
+    presentacion VARCHAR(100) DEFAULT NULL,
+    concentracion VARCHAR(100) DEFAULT NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_medicamento)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE recetas (
+    id_receta INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cita INT NOT NULL,
+    id_medicamento INT UNSIGNED NOT NULL,
+
+    dosis VARCHAR(100) DEFAULT NULL,
+    frecuencia VARCHAR(100) DEFAULT NULL,
+    duracion VARCHAR(100) DEFAULT NULL,
+    instrucciones TEXT DEFAULT NULL,
+
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_receta),
+
+    KEY fk_receta_cita (id_cita),
+    KEY fk_receta_medicamento (id_medicamento),
+
+    CONSTRAINT fk_receta_cita
+        FOREIGN KEY (id_cita)
+        REFERENCES citas(id_cita)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_receta_medicamento
+        FOREIGN KEY (id_medicamento)
+        REFERENCES medicamentos(id_medicamento)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+INSERT INTO medicamentos
+(nombre,presentacion,concentracion,activo)
+VALUES
+('Ibuprofeno','Tabletas','400mg',1),
+('Ibuprofeno','Tabletas','600mg',1),
+('Ibuprofeno','Suspensión','100mg/5ml',1),
+('Paracetamol','Tabletas','500mg',1),
+('Paracetamol','Jarabe','120mg/5ml',1),
+('Naproxeno','Tabletas','500mg',1),
+('Diclofenaco','Tabletas','50mg',1),
+('Diclofenaco','Gel','1%',1),
+('Ketorolaco','Tabletas','10mg',1),
+('Metamizol','Tabletas','500mg',1),
+('Amoxicilina','Cápsulas','500mg',1),
+('Amoxicilina','Suspensión','250mg/5ml',1),
+('Amoxicilina/Clavulanato','Tabletas','875mg/125mg',1),
+('Azitromicina','Tabletas','500mg',1),
+('Ciprofloxacino','Tabletas','500mg',1),
+('Claritromicina','Tabletas','500mg',1),
+('Cefalexina','Cápsulas','500mg',1),
+('Metronidazol','Tabletas','500mg',1),
+('Trimetoprim/Sulfa','Tabletas','160mg/800mg',1),
+('Doxiciclina','Cápsulas','100mg',1),
+('Omeprazol','Cápsulas','20mg',1),
+('Omeprazol','Cápsulas','40mg',1),
+('Ranitidina','Tabletas','150mg',1),
+('Metoclopramida','Tabletas','10mg',1),
+('Loperamida','Cápsulas','2mg',1),
+('Sales de Rehidratación','Polvo','27.9g/sobre',1),
+('Losartán','Tabletas','50mg',1),
+('Losartán','Tabletas','100mg',1),
+('Enalapril','Tabletas','10mg',1),
+('Amlodipino','Tabletas','5mg',1),
+('Atorvastatina','Tabletas','20mg',1),
+('Atorvastatina','Tabletas','40mg',1),
+('Metoprolol','Tabletas','50mg',1),
+('Metformina','Tabletas','500mg',1),
+('Metformina','Tabletas','850mg',1),
+('Glibenclamida','Tabletas','5mg',1),
+('Salbutamol','Inhalador','100mcg/dosis',1),
+('Cetirizina','Tabletas','10mg',1),
+('Loratadina','Tabletas','10mg',1),
+('Dexametasona','Tabletas','4mg',1),
+('Dexametasona','Ampolleta','4mg/2ml',1),
+('Prednisona','Tabletas','5mg',1),
+('Vitamina C','Tabletas','500mg',1),
+('Vitamina D3','Tabletas','1000 UI',1),
+('Sulfato Ferroso','Tabletas','300mg',1),
+('Ácido Fólico','Tabletas','5mg',1),
+('Clotrimazol','Crema','1%',1),
+('Fluconazol','Cápsulas','150mg',1),
+('Alprazolam','Tabletas','0.5mg',1),
+('Tramadol','Cápsulas','50mg',1);
